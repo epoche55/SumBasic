@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-public class FileIO {
+public class SumBasic {
     private static final String FILENAME = "sample.txt";
     private Scanner x;
     private Hashtable<String, Double> wordHash;
@@ -22,18 +22,17 @@ public class FileIO {
     private int wordCount;
     private static Set<String> hset;
     
+    /**
+     * imports all words (no duplicates) into the wordHash hashtable
+     */
     public void importComments(){
         
-        // 1
         try{
-            x=new Scanner(new File(FILENAME));
+            Scanner x = new Scanner(new File(FILENAME));
         }
         catch(Exception e){
             System.out.println("Could not find file"); 
         }
-        
-        // 2
-        
         
         wordHash = new Hashtable<String, Double>();
         String a;
@@ -50,6 +49,21 @@ public class FileIO {
 
         x.close();
     }
+    
+    /**
+     * Calculate each word probability
+     */
+    public void calculateWordProbability(){
+        double probability;
+        for(String key: wordHash.keySet()){
+            probability = wordHash.get(key)/wordCount;
+            wordHash.put(key, probability);
+        }
+    }
+    
+    /**
+     * Calculates the weight of each comment
+     */
     public void calculateCommentWeight(){
         commentHash = new Hashtable<String, Double>();
         BufferedReader br = null;
@@ -74,16 +88,10 @@ public class FileIO {
             e.printStackTrace();
         }
     }
-    
-    
-    public void calculateWordProbability(){
-        double probability;
-        for(String key: wordHash.keySet()){
-            probability = wordHash.get(key)/wordCount;
-            wordHash.put(key, probability);
-        }
-    }
 
+    /**
+     * Recalcuate each comment weight 
+     */
     public void updateCommentWeight(){
         double commentWeight; 
         Set<String> keys = commentHash.keySet();
@@ -99,6 +107,11 @@ public class FileIO {
             commentHash.put(key, commentWeight);
         }
     }
+    
+    /**
+     * Find the comment with highest weight
+     * @return maxKey - comment string value
+     */
     public String findTopComment(){
         String maxKey=null;
         Double maxValue = Double.MIN_VALUE; 
@@ -110,6 +123,11 @@ public class FileIO {
         }
         return maxKey;
     }    
+    
+    /** 
+     * update word probability from chosen comment
+     * @param topComment 
+     */
     public void updateWordProbability(String topComment){
         hset = new HashSet<>(Arrays.asList(topComment.split(" +")));
         double newProbability;
@@ -119,13 +137,12 @@ public class FileIO {
         }
     }
 
-    
     public static void main(String[] args) {
         System.out.println("How many comments? ");
         Scanner in = new Scanner(System.in);
         int numberOfComments = in.nextInt();
         
-        FileIO r =new FileIO();
+        SumBasic r =new SumBasic();
         r.importComments();
         r.calculateWordProbability();
         r.calculateCommentWeight();
@@ -143,7 +160,5 @@ public class FileIO {
             commentHash.remove(maxKey);
             r.updateCommentWeight();
         }
-
     }
-    
 }
