@@ -1,1 +1,1 @@
-# SumBasic
+# Summarization Algorithms
