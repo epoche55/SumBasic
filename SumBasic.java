@@ -14,26 +14,26 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-public class SumBasic {
-    private static final String FILENAME = "sample.txt";
+public class SumBasic 
+{
+    private static final String FILENAME = "concerns.txt";
     private Scanner x;
     private Hashtable<String, Double> wordHash;
     private static Hashtable<String, Double> commentHash;
     private int wordCount;
-    private static Set<String> hset;
+    private static Set<String> commentLine;
     
     /**
-     * imports all words (no duplicates) into the wordHash hashtable
+     * import all words (no duplicates) into the wordHash hashtable with the number of occurences within the dataset
      */
-    public void importComments(){
-        
+    public void importWords(){
         try{
-            Scanner x = new Scanner(new File(FILENAME));
+            x=new Scanner(new File(FILENAME));
         }
         catch(Exception e){
             System.out.println("Could not find file"); 
         }
-        
+
         wordHash = new Hashtable<String, Double>();
         String a;
         wordCount = 0;
@@ -77,18 +77,18 @@ public class SumBasic {
                 commentWeight = 0.0;
                 sCurrentLine = sCurrentLine.toLowerCase();
                 
-                hset = new HashSet<>(Arrays.asList(sCurrentLine.split(" +")));
-                for (String temp : hset) {
+                commentLine = new HashSet<>(Arrays.asList(sCurrentLine.split(" +")));
+                for (String temp : commentLine) {
                     commentWeight += wordHash.get(temp);
                 }
-                commentWeight = commentWeight / hset.size();                
+                commentWeight = commentWeight / commentLine.size();                
                 commentHash.put(sCurrentLine, commentWeight);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+    
     /**
      * Recalcuate each comment weight 
      */
@@ -98,13 +98,14 @@ public class SumBasic {
         for(String key: keys){
             
             commentWeight=0.0;
-            hset = new HashSet<>(Arrays.asList(key.split(" +")));
-            for (String temp : hset) {
+            commentLine = new HashSet<>(Arrays.asList(key.split(" +")));
+            for (String temp : commentLine) {
                 commentWeight += wordHash.get(temp);
             }
             
-            commentWeight = commentWeight / hset.size();  
+            commentWeight = commentWeight / commentLine.size();  
             commentHash.put(key, commentWeight);
+            
         }
     }
     
@@ -129,21 +130,23 @@ public class SumBasic {
      * @param topComment 
      */
     public void updateWordProbability(String topComment){
-        hset = new HashSet<>(Arrays.asList(topComment.split(" +")));
+        commentLine = new HashSet<>(Arrays.asList(topComment.split(" +")));
         double newProbability;
-        for (String temp : hset) {
+        for (String temp : commentLine) {
             newProbability = Math.pow(wordHash.get(temp), 2);
             wordHash.put(temp, newProbability );
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println("How many comments? ");
+    
+    public static void main(String[] args) 
+    {
+        System.out.println("How many top comments? ");
         Scanner in = new Scanner(System.in);
         int numberOfComments = in.nextInt();
         
         SumBasic r =new SumBasic();
-        r.importComments();
+        r.importWords();
         r.calculateWordProbability();
         r.calculateCommentWeight();
         String maxKey;
@@ -152,13 +155,16 @@ public class SumBasic {
         {
             if (commentHash.isEmpty())
                 break;
+            
             maxKey = r.findTopComment();
             
-            System.out.println("Comment #" + (int)(i+1) +": "+ maxKey + " Value = "+commentHash.get(maxKey));
+            System.out.println("Comment #" + (int)(i+1) +": "+ maxKey + " | Weight = "+commentHash.get(maxKey));
             r.updateWordProbability(maxKey);
             
             commentHash.remove(maxKey);
             r.updateCommentWeight();
         }
+
     }
+    
 }
